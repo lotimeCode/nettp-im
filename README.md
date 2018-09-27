@@ -1,2 +1,2 @@
-# nettp-im
+# netty-im
 ### just a learning netty demo
