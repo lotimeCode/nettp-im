@@ -1,10 +1,8 @@
 package Demo;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -12,6 +10,8 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+
+import java.nio.charset.Charset;
 
 /**
  * @author wangzhimin
@@ -74,13 +74,7 @@ public class NettyServer {
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel ch) {
-                        ch.pipeline().addLast(new StringDecoder());
-                        ch.pipeline().addLast(new SimpleChannelInboundHandler<String>() {
-                            @Override
-                            protected void channelRead0(ChannelHandlerContext ctx, String msg) {
-                                System.out.println(msg);
-                            }
-                        });
+                        ch.pipeline().addLast(new ServerHandle());
                     }
                 }).bind(port).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
@@ -114,5 +108,24 @@ public class NettyServer {
                 }
             }
         });
+    }
+}
+
+
+class ServerHandle extends ChannelInboundHandlerAdapter{
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        ByteBuf byteBuf = (ByteBuf) msg;
+        System.out.println("server receive message : " + byteBuf.toString(Charset.forName("UTF-8")));
+        ctx.channel().writeAndFlush(getByteBuf(ctx));
+    }
+
+
+    private ByteBuf getByteBuf(ChannelHandlerContext ctx) {
+        byte[] bytes = "你好，欢迎关注我的微信公众号，《闪电侠的博客》!".getBytes(Charset.forName("utf-8"));
+
+        ByteBuf buffer = ctx.alloc().buffer();
+        buffer.writeBytes(bytes);
+        return buffer;
     }
 }

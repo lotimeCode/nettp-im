@@ -1,9 +1,9 @@
 package Demo;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
@@ -11,6 +11,7 @@ import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +51,8 @@ public class NettyClient {
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel ch) throws Exception {
-                        ch.pipeline().addLast(new StringEncoder());
+                        //ch.pipeline()返回的是和这条连接相关的逻辑处理链，采用了责任链模式
+                        ch.pipeline().addLast(new ClientHandle());
                     }
                 });
         int retry = 0;
@@ -66,11 +68,11 @@ public class NettyClient {
             }
         }).channel();
 
-        try {
-            sendMessage(channel, "nice to meet you");
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//        try {
+//            sendMessage(channel, "nice to meet you");
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
 
     }
 
@@ -119,5 +121,29 @@ public class NettyClient {
                 break;
             }
         }
+    }
+}
+
+class ClientHandle extends ChannelInboundHandlerAdapter{
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("client send message ...");
+        ctx.channel().writeAndFlush(getByteBuf(ctx));
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        ByteBuf byteBuf = (ByteBuf) msg;
+        System.out.println("client receive message : " + byteBuf.toString(Charset.forName("UTF-8")));
+    }
+
+    private ByteBuf getByteBuf(ChannelHandlerContext ctx){
+        // 1. 获取二进制抽象 ByteBuf
+        ByteBuf byteBuf = ctx.alloc().buffer();
+        // 2. 准备数据，指定字符串的字符集为 utf-8
+        byte[] bytes = "hello world, lotime".getBytes(Charset.forName("UTF-8"));
+        // 3. 填充数据到 ByteBuf
+        byteBuf.writeBytes(bytes);
+        return byteBuf;
     }
 }
