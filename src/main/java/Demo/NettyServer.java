@@ -35,7 +35,7 @@ https://juejin.im
  */
 public class NettyServer {
     public static void main(String[] args) {
-        startNettyServer(1000);
+        startNettyServer(8000);
     }
 
 
@@ -107,6 +107,7 @@ public class NettyServer {
             public void operationComplete(Future<? super Void> future) throws Exception {
                 if(future.isSuccess()){
                     System.out.println(String.format("bind port [ %d ] success", port));
+                    return;
                 }else{
                     System.out.println(String.format("bind port [ %d ] fail", port));
                     bindPort(serverBootstrap,port + 1);
