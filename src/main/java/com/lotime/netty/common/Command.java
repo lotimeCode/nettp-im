@@ -6,5 +6,7 @@ package com.lotime.netty.common;
  */
 public interface Command {
 
-    Byte LOGIN  = 1;
+    Byte LOGIN_REQ  = 1;
+
+    Byte LOGIN_RES = 2;
 }

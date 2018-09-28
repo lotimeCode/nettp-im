@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 public class LoginRequestPacket extends Packet {
-    private Integer userId;
+    private String userId;
 
     private String userName;
 
@@ -17,6 +17,6 @@ public class LoginRequestPacket extends Packet {
 
     @Override
     public Byte getCommand() {
-        return Command.LOGIN;
+        return Command.LOGIN_REQ;
     }
 }

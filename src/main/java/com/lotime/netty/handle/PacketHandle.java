@@ -4,6 +4,7 @@ import com.lotime.netty.common.Command;
 import com.lotime.netty.common.SerializerAlgorithm;
 import com.lotime.netty.handle.inter.Serializer;
 import com.lotime.netty.packet.LoginRequestPacket;
+import com.lotime.netty.packet.LoginResponsePacket;
 import com.lotime.netty.packet.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -39,19 +40,30 @@ public class PacketHandle {
     private static final Map<Byte, Class<? extends Packet>> packetTypeMap;
     private static final Map<Byte, Serializer> serializerMap;
 
+    private static PacketHandle ourInstance = new PacketHandle();
+
+    public static PacketHandle getInstance() {
+        return ourInstance;
+    }
+
     static {
         packetTypeMap = new HashMap<>();
-        packetTypeMap.put(Command.LOGIN, LoginRequestPacket.class);
+        packetTypeMap.put(Command.LOGIN_REQ, LoginRequestPacket.class);
+        packetTypeMap.put(Command.LOGIN_RES, LoginResponsePacket.class);
 
         serializerMap = new HashMap<>();
         serializerMap.put(SerializerAlgorithm.JSON, new JSONSerializer());
     }
 
-    public ByteBuf encode(Packet packet){
-        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.ioBuffer();
+    private PacketHandle(){
+
+    }
+
+    public ByteBuf encode(ByteBufAllocator byteBufAllocator,Packet packet){
+        ByteBuf byteBuf = byteBufAllocator.ioBuffer();
         byte[] bytes = Serializer.DEFAULT.serialize(packet);
         byteBuf.writeInt(MAGIC_NUMBER);
-        byteBuf.writeByte(packet.version);
+        byteBuf.writeByte(packet.getVersion());
         byteBuf.writeByte(Serializer.DEFAULT_SERIALIZER);
         byteBuf.writeByte(packet.getCommand());
         byteBuf.writeInt(bytes.length);
