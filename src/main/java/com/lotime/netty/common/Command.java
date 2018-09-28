@@ -9,4 +9,8 @@ public interface Command {
     Byte LOGIN_REQ  = 1;
 
     Byte LOGIN_RES = 2;
+
+    Byte MESS_REQ = 3;
+
+    Byte MESS_RES = 4;
 }

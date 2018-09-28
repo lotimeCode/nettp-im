@@ -2,9 +2,8 @@ package com.lotime.netty.server;
 
 import com.alibaba.fastjson.JSON;
 import com.lotime.netty.handle.PacketHandle;
-import com.lotime.netty.packet.LoginRequestPacket;
-import com.lotime.netty.packet.LoginResponsePacket;
-import com.lotime.netty.packet.Packet;
+import com.lotime.netty.packet.*;
+import com.lotime.netty.util.LoginUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -18,12 +17,13 @@ import java.util.Date;
 public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        System.out.println(new Date() + ": 客户端开始登录……");
+
         ByteBuf requestByteBuf = (ByteBuf) msg;
 
         Packet packet = PacketHandle.getInstance().decode(requestByteBuf);
 
         if (packet instanceof LoginRequestPacket) {
+            System.out.println(new Date() + ": 客户端开始登录……");
             // 登录流程
             LoginRequestPacket loginRequestPacket = (LoginRequestPacket) packet;
 
@@ -40,6 +40,15 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             // 登录响应
             System.out.println("==== res : " + JSON.toJSONString(loginResponsePacket));
             ByteBuf responseByteBuf = PacketHandle.getInstance().encode(ctx.alloc(), loginResponsePacket);
+            ctx.channel().writeAndFlush(responseByteBuf);
+        }else if(packet instanceof MessageRequestPacket){
+            MessageRequestPacket messageRequestPacket = (MessageRequestPacket) packet;
+            System.out.println("服务端接收到信息");
+            System.out.println(messageRequestPacket.getTimestamp() + " : " + messageRequestPacket.getMessage());
+            MessageResponsePacket messageResponsePacket = new MessageResponsePacket();
+            messageResponsePacket.setMessage("你好 。。。");
+            messageResponsePacket.setTimestamp(new Date());
+            ByteBuf responseByteBuf = PacketHandle.getInstance().encode(ctx.alloc(), messageResponsePacket);
             ctx.channel().writeAndFlush(responseByteBuf);
         }
     }

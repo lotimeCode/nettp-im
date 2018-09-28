@@ -3,7 +3,9 @@ package com.lotime.netty.client;
 import com.lotime.netty.handle.PacketHandle;
 import com.lotime.netty.packet.LoginRequestPacket;
 import com.lotime.netty.packet.LoginResponsePacket;
+import com.lotime.netty.packet.MessageResponsePacket;
 import com.lotime.netty.packet.Packet;
+import com.lotime.netty.util.LoginUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -45,9 +47,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
             if (loginResponsePacket.isSuccess()) {
                 System.out.println(new Date() + ": 客户端登录成功");
+                LoginUtil.markAsLogin(ctx.channel());
             } else {
                 System.out.println(new Date() + ": 客户端登录失败，原因：" + loginResponsePacket.getReason());
             }
+        }else if(packet instanceof MessageResponsePacket){
+            MessageResponsePacket messageResponsePacket = (MessageResponsePacket) packet;
+            System.out.println(messageResponsePacket.getTimestamp() + " : " + messageResponsePacket.getMessage());
         }
     }
 }

@@ -3,9 +3,7 @@ package com.lotime.netty.handle;
 import com.lotime.netty.common.Command;
 import com.lotime.netty.common.SerializerAlgorithm;
 import com.lotime.netty.handle.inter.Serializer;
-import com.lotime.netty.packet.LoginRequestPacket;
-import com.lotime.netty.packet.LoginResponsePacket;
-import com.lotime.netty.packet.Packet;
+import com.lotime.netty.packet.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
@@ -50,6 +48,8 @@ public class PacketHandle {
         packetTypeMap = new HashMap<>();
         packetTypeMap.put(Command.LOGIN_REQ, LoginRequestPacket.class);
         packetTypeMap.put(Command.LOGIN_RES, LoginResponsePacket.class);
+        packetTypeMap.put(Command.MESS_REQ, MessageRequestPacket.class);
+        packetTypeMap.put(Command.MESS_RES, MessageResponsePacket.class);
 
         serializerMap = new HashMap<>();
         serializerMap.put(SerializerAlgorithm.JSON, new JSONSerializer());
