@@ -1,5 +1,7 @@
 package com.lotime.netty.server;
 
+import com.lotime.netty.handle.PacketDecodeHandle;
+import com.lotime.netty.handle.PacketEncodeHandle;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -31,7 +33,12 @@ public class NettyServer {
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel ch) {
-                        ch.pipeline().addLast(new ServerHandler());
+//                        ch.pipeline().addLast(new ServerHandler());
+                        ch.pipeline()
+                                .addLast(new PacketDecodeHandle())
+                                .addLast(new LoginReqHandle())
+                                .addLast(new MessageReqHandle())
+                                .addLast(new PacketEncodeHandle());
                     }
                 });
 

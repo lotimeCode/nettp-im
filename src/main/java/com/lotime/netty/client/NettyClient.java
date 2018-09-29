@@ -1,5 +1,7 @@
 package com.lotime.netty.client;
 
+import com.lotime.netty.handle.PacketDecodeHandle;
+import com.lotime.netty.handle.PacketEncodeHandle;
 import com.lotime.netty.handle.PacketHandle;
 import com.lotime.netty.packet.MessageRequestPacket;
 import com.lotime.netty.util.LoginUtil;
@@ -40,7 +42,11 @@ public class NettyClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) {
-                        ch.pipeline().addLast(new ClientHandler());
+//                        ch.pipeline().addLast(new ClientHandler());
+                        ch.pipeline().addLast(new PacketDecodeHandle())
+                                .addLast(new LoginResHandle())
+                                .addLast(new MessageResHandle())
+                                .addLast(new PacketEncodeHandle());
                     }
                 });
 
